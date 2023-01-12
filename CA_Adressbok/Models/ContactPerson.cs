@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CA_Adressbok.Interfaces;
 
-namespace CA_Adressbok.Models
+namespace CA_Adressbok.Models;
+
+internal class ContactPerson : IContactPerson
 {
-	internal class ContactPerson
-	{
-	}
+	public Guid Id { get; set; } = Guid.NewGuid();
+	public string FirstName { get; set; } = null!;
+	public string LastName { get; set; } = null!;
+	public string Email { get; set; } = null!;
 }
