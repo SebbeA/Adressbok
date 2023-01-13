@@ -6,5 +6,7 @@ internal interface IContactPerson
 	string FirstName { get; set; }
 	string LastName { get; set; }
 	string Email { get; set; }
+	string Phone { get; set; }
+	string Adress { get; set; }
 	string DisplayName => $"{FirstName} {LastName}";
 }
