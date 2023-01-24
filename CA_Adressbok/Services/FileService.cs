@@ -1,19 +1,24 @@
-﻿namespace CA_Adressbok.Services;
+﻿using CA_Adressbok.Models;
+using Newtonsoft.Json;
 
-internal class FileService
+namespace CA_Adressbok.Services;
+
+public class FileService
 {
-	public void Save(string filePath, string content)
+	private List<ContactPerson> persons = new List<ContactPerson>();
+
+	public void Save(string filePath, string contacts)
 	{
 		using var sw = new StreamWriter(filePath);
-		sw.Write(content);
+		sw.Write(JsonConvert.SerializeObject(contacts));
 	}
-	public string Read(string filePath)
+	public void Read(string filePath)
 	{
 		try
 		{
 			using var sr = new StreamReader(filePath);
-			return sr.ReadToEnd();
+			persons = JsonConvert.DeserializeObject<List<ContactPerson>>(sr.ReadToEnd())!;
 		}
-		catch { return null!; }
+		catch { persons = new List<ContactPerson>(); }
 	}
 }

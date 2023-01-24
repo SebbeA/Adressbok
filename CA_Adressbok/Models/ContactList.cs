@@ -4,6 +4,6 @@ namespace CA_Adressbok.Models
 {
 	internal class ContactList
 	{
-		public List<IContactPerson> persons { get; set; } = null!;
-	}
+		public List<ContactPerson> persons { get; set; } = new List<ContactPerson>();
+	}	
 }
