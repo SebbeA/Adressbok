@@ -1,17 +1,16 @@
 ﻿using CA_Adressbok.Models;
-using Newtonsoft.Json;
 
 namespace CA_Adressbok.Services;
 
 internal class MainMenu
 {
-	private readonly List<ContactPerson> persons = new List<ContactPerson>();
-	private readonly FileService file = new FileService();
-	//private PersonService _personService = new();
+	private List<ContactPerson> contacts = new List<ContactPerson>();
+	private FileService file = new FileService($@"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\contacts.json");
 	public string FilePath { get; set; } = null!;
 	public void OptionMenu()
 	{
 		Console.Clear();
+		file.Read();
 		Console.WriteLine("Välkommen till adressboken!");
 		Console.WriteLine("1. Skapa en ny kontaktperson");
 		Console.WriteLine("2. Visa alla kontaktpersoner");
@@ -29,8 +28,6 @@ internal class MainMenu
 			case "4": OptionFour(); break;
 			case "5": Environment.Exit(0); break;
 		}
-
-		file.Save(FilePath, JsonConvert.SerializeObject(persons));
 	}
 
 	private void OptionOne()
@@ -47,9 +44,8 @@ internal class MainMenu
 			case "2": return;
 		}
 
-		file.Save(FilePath, JsonConvert.SerializeObject(persons));
+		file.Save(contacts);
 	}
-
 	private void CreateContactPerson()
 	{
 		Console.Clear();
@@ -67,16 +63,16 @@ internal class MainMenu
 		Console.Write("Ange adress: ");
 		person.Adress = Console.ReadLine() ?? "";
 
-		persons.Add(person);
-		file.Save(FilePath, JsonConvert.SerializeObject(persons));
+		contacts.Add(person);
+		file.Save(contacts);
 	}
-
 	private void OptionTwo()
 	{
 		Console.Clear();
 		Console.WriteLine("Visa alla kontaktpersoner.\n ");
 		Console.WriteLine("1. Visa alla. ");
 		Console.WriteLine("2. Återgå till startsida. ");
+		contacts = file.Read();
 		var option = Console.ReadLine();
 
 		switch (option)
@@ -90,22 +86,29 @@ internal class MainMenu
 		Console.Clear();
 		Console.WriteLine("Här är alla kontaktpersoner\n");
 
-		Console.WriteLine("Antal kontakter: " + persons.Count);
+		if (contacts.Count == 0)
+		{
+			Console.WriteLine("Det finns inga kontaker i listan.");
+		}
+		else
+		{
+			Console.WriteLine("Antal kontakter: " + contacts.Count);
 
-		//foreach (ContactPerson person in persons)
-		//{
-		//	Console.WriteLine($"{person.FirstName} {person.LastName}, {person.Email}, {person.Phone}, {person.Adress}");
-		//}
+			foreach (ContactPerson person in contacts)
+			{
+				Console.WriteLine($"{person.FirstName} {person.LastName}, {person.Email}, {person.Phone}, {person.Adress}");
+			}
+		}
 
-		file.Read(FilePath);
-		Console.WriteLine("Tryck Enter för att gå tillbaka till menyn.");
+		file.Read();
+		Console.WriteLine("Tryck på valfri tangent för att gå tillbaka till huvudmenyn.");
 		Console.ReadLine();
 	}
 	private void OptionThree()
 	{
 		Console.Clear();
 		Console.WriteLine("Visa en specifik kontaktperson.\n ");
-		Console.WriteLine("1. Sök. ");
+		Console.WriteLine("1. Sök på för och efternamn. ");
 		Console.WriteLine("2. Återgå till startsida. ");
 		var option = Console.ReadLine();
 
@@ -118,16 +121,71 @@ internal class MainMenu
 	private void ShowOneContact()
 	{
 		Console.Clear();
-		Console.WriteLine("Ange förnamn och efternamn");
-		var name = Console.ReadLine();
+		Console.WriteLine("Ange förnamn");
+		var firstName = Console.ReadLine();
+		Console.WriteLine("Ange efternamn");
+		var lastName = Console.ReadLine();
 
+		var contact = contacts.FirstOrDefault(c => c.FirstName == firstName && c.LastName == lastName);
+		if (contact == null)
+		{
+			Console.WriteLine("Kontaktpersonen hittades inte.");
+		}
+		else
+		{
+			Console.WriteLine($"{contact.FirstName} {contact.LastName}, {contact.Email}, {contact.Phone}, {contact.Adress}");
+		}
+		Console.WriteLine("Tryck på valfri tangent för att gå tillbaka till huvudmenyn.");
+		Console.ReadLine();
 	}
+
 	private void OptionFour()
 	{
+		Console.Clear();
+		Console.WriteLine("Radera en specifik kontaktperson.\n ");
+		Console.WriteLine("1. Sök på för och efternamn. ");
+		Console.WriteLine("2. Återgå till startsida. ");
+		var option = Console.ReadLine();
 
+		switch (option)
+		{
+			case "1": RewmoveOneContact(); break;
+			case "2": return;
+		}
 	}
-	private void OptionFive()
+	private void RewmoveOneContact()
 	{
+		Console.Clear();
+		Console.WriteLine("Radera en kontaktperson");
+		Console.WriteLine("Ange förnamn");
+		var firstName = Console.ReadLine();
+		Console.WriteLine("Ange efternamn");
+		var lastName = Console.ReadLine();
 
+		var contact = contacts.FirstOrDefault(c => c.FirstName == firstName && c.LastName == lastName);
+		if (contact == null)
+		{
+			Console.WriteLine("Kontaktpersonen hittades inte.");
+		}
+		else
+		{
+			Console.WriteLine("Är du säker på att du vill ta bort denna kontaktperson? (y/n)");
+			var confirm = Console.ReadLine();
+
+			if (confirm.ToLower() == "y")
+			{
+				contacts.Remove(contact);
+				file.Delete(firstName, lastName);
+				Console.WriteLine("Kontaktpersonen har tagits bort.");
+				file.Save(contacts);
+			}
+			else
+			{
+				Console.WriteLine("Ingen kontaktperson togs bort.");
+			}
+		}
+		file.Read();
+		Console.WriteLine("Tryck på valfri tangent för att gå tillbaka till huvudmenyn.");
+		Console.ReadKey();
 	}
 }

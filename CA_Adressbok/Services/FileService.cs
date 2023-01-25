@@ -5,20 +5,75 @@ namespace CA_Adressbok.Services;
 
 public class FileService
 {
-	private List<ContactPerson> persons = new List<ContactPerson>();
+	private List<ContactPerson> _persons;
+	private readonly string _filePath;
 
-	public void Save(string filePath, string contacts)
+	public FileService(string filePath)
 	{
-		using var sw = new StreamWriter(filePath);
+		_filePath = filePath;
+		_persons = new List<ContactPerson>();
+	}
+
+	public void Save(List<ContactPerson> contacts)
+	{
+		using var sw = new StreamWriter(_filePath);
 		sw.Write(JsonConvert.SerializeObject(contacts));
 	}
-	public void Read(string filePath)
+
+	public void Delete(string firstName, string lastName)
 	{
 		try
 		{
-			using var sr = new StreamReader(filePath);
-			persons = JsonConvert.DeserializeObject<List<ContactPerson>>(sr.ReadToEnd())!;
+			var tempFile = Path.GetTempFileName();
+			using (var sr = new StreamReader(_filePath))
+			using (var sw = new StreamWriter(tempFile))
+			{
+				string line;
+				while ((line = sr.ReadLine()) != null)
+				{
+					var contact = JsonConvert.DeserializeObject<ContactPerson>(line);
+					if (contact.FirstName != firstName || contact.LastName != lastName)
+					{
+						sw.WriteLine(line);
+					}
+				}
+			}
+			File.Delete(_filePath);
+			File.Move(tempFile, _filePath);
 		}
-		catch { persons = new List<ContactPerson>(); }
+		catch { }
+	}
+
+	public List<ContactPerson> Read()
+	{
+		try
+		{
+			using var sr = new StreamReader(_filePath);
+			_persons = JsonConvert.DeserializeObject<List<ContactPerson>>(sr.ReadToEnd())!;
+		}
+		catch { _persons = new List<ContactPerson>(); }
+
+		return _persons;
+	}
+
+	public ContactPerson GetContact(string firstName, string lastName)
+	{
+		try
+		{
+			using (var sr = new StreamReader(_filePath))
+			{
+				string line;
+				while ((line = sr.ReadLine()) != null)
+				{
+					var contact = JsonConvert.DeserializeObject<ContactPerson>(line);
+					if (contact.FirstName != firstName && contact.LastName != lastName)
+					{
+						return contact;
+					}
+				}
+			}
+		}
+		catch { }
+		return null!;
 	}
 }
