@@ -20,7 +20,7 @@ public class FileService
 		sw.Write(JsonConvert.SerializeObject(contacts));
 	}
 
-	public void Delete(string firstName, string lastName)
+	public void DeleteContact(string firstName, string lastName)
 	{
 		try
 		{
@@ -29,10 +29,10 @@ public class FileService
 			using (var sw = new StreamWriter(tempFile))
 			{
 				string line;
-				while ((line = sr.ReadLine()) != null)
+				while ((line = sr.ReadLine() ?? "") != "")
 				{
 					var contact = JsonConvert.DeserializeObject<ContactPerson>(line);
-					if (contact.FirstName != firstName || contact.LastName != lastName)
+					if (contact != null && contact.FirstName != firstName || contact != null && contact.LastName != lastName)
 					{
 						sw.WriteLine(line);
 					}
@@ -63,10 +63,10 @@ public class FileService
 			using (var sr = new StreamReader(_filePath))
 			{
 				string line;
-				while ((line = sr.ReadLine()) != null)
+				while ((line = sr.ReadLine() ?? "") != "")
 				{
 					var contact = JsonConvert.DeserializeObject<ContactPerson>(line);
-					if (contact.FirstName != firstName && contact.LastName != lastName)
+					if (contact != null && contact.FirstName != firstName && contact.LastName != lastName)
 					{
 						return contact;
 					}

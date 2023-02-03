@@ -126,7 +126,7 @@ internal class MainMenu
 		Console.WriteLine("Ange efternamn");
 		var lastName = Console.ReadLine();
 
-		var contact = contacts.FirstOrDefault(c => c.FirstName == firstName && c.LastName == lastName);
+		var contact = contacts.FirstOrDefault(c => c.FirstName.ToLower() == firstName && c.LastName.ToLower() == lastName);
 		if (contact == null)
 		{
 			Console.WriteLine("Kontaktpersonen hittades inte.");
@@ -162,7 +162,7 @@ internal class MainMenu
 		Console.WriteLine("Ange efternamn");
 		var lastName = Console.ReadLine();
 
-		var contact = contacts.FirstOrDefault(c => c.FirstName == firstName && c.LastName == lastName);
+		var contact = contacts.FirstOrDefault(c => c.FirstName.ToLower() == firstName && c.LastName.ToLower() == lastName);
 		if (contact == null)
 		{
 			Console.WriteLine("Kontaktpersonen hittades inte.");
@@ -172,12 +172,15 @@ internal class MainMenu
 			Console.WriteLine("Är du säker på att du vill ta bort denna kontaktperson? (y/n)");
 			var confirm = Console.ReadLine();
 
-			if (confirm.ToLower() == "y")
+			if (confirm?.ToLower() == "y")
 			{
-				contacts.Remove(contact);
-				file.Delete(firstName, lastName);
-				Console.WriteLine("Kontaktpersonen har tagits bort.");
-				file.Save(contacts);
+				if (firstName != null && lastName != null)
+				{
+					contacts.Remove(contact);
+					file.DeleteContact(firstName, lastName);
+					Console.WriteLine("Kontaktpersonen har tagits bort.");
+					file.Save(contacts);
+				}
 			}
 			else
 			{
